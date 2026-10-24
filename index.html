@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SGH HDU | Executive Quality Audit Report</title>
+    <style>
+        :root {
+            --hosp-primary: #003366;       /* Deep Hospital Navy */
+            --hosp-secondary: #0056b3;     /* Clinical Blue */
+            --hosp-accent: #28a745;        /* Compliance Green */
+            --hosp-warning: #ffc107;       /* Needs Improvement */
+            --hosp-danger: #dc3545;        /* Non-Compliant Red */
+            --hosp-bg: #f0f2f5;            /* Standard App BG */
+            --card-bg: #ffffff;
+            --border-color: #ced4da;
+            --text-dark: #212529;
+            --text-muted: #6c757d;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--hosp-bg);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 15px 10px;
+        }
+
+        .main-wrapper {
+            max-width: 1020px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            overflow: hidden;
+            border-top: 5px solid var(--hosp-primary);
+        }
+
+        /* Hospital Header */
+        .hospital-header {
+            padding: 18px 25px;
+            background: #ffffff;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-logo {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+        }
+
+        .header-titles h1 {
+            margin: 0;
+            font-size: 18px;
+            color: var(--hosp-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 800;
+        }
+
+        .header-titles h2 {
+            margin: 3px 0 0 0;
+            font-size: 13.5px;
+            color: var(--hosp-secondary);
+            font-weight: 600;
+        }
+
+        .header-titles p {
+            margin: 2px 0 0 0;
+            font-size: 11.5px;
+            color: var(--text-muted);
+        }
+
+        .system-badge {
+            background: #e7f1ff;
+            color: var(--hosp-secondary);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            border: 1px solid #b8daff;
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        .content-body {
+            padding: 22px 28px;
+        }
+
+        .selection-panel {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 18px;
+            margin-bottom: 22px;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary { background: var(--hosp-primary); color: #fff; }
+        .btn-secondary { background: #6c757d; color: #fff; }
+        .btn-accent { background: var(--hosp-accent); color: #fff; }
+        .btn:hover { opacity: 0.92; }
+
+        /* Report Containers */
+        #reportDisplayArea {
+            display: none;
+        }
+
+        .report-header-box {
+            border-bottom: 2px solid var(--hosp-primary);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .report-header-box h2 {
+            margin: 0;
+            font-size: 19px;
+            color: var(--hosp-primary);
+            text-transform: uppercase;
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            font-size: 13.5px;
+            margin-top: 12px;
+            background: #fafbfc;
+            padding: 12px 16px;
+            border-radius: 5px;
+            border: 1px solid #e9ecef;
+        }
+
+        .section-heading {
+            font-size: 15px;
+            color: var(--hosp-primary);
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 24px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 5px;
+        }
+
+        /* Summary Indicator Table */
+        .table-custom {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin-bottom: 18px;
+        }
+
+        .table-custom th, .table-custom td {
+            border: 1px solid #dee2e6;
+            padding: 9px 12px;
+        }
+
+        .table-custom th {
+            background-color: #f1f4f8;
+            color: var(--hosp-primary);
+            font-weight: 700;
+            text-align: left;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .status-compliant { background: #d4edda; color: #155724; }
+        .status-improvement { background: #fff3cd; color: #856404; }
+        .status-danger { background: #f8d7da; color: #721c24; }
+
+        .callout-box {
+            padding: 15px 18px;
+            border-radius: 5px;
+            margin-bottom: 16px;
+            font-size: 13.5px;
+            line-height: 1.5;
+        }
+
+        .callout-concern {
+            background-color: #fff5f5;
+            border-left: 4px solid var(--hosp-danger);
+            color: #491217;
+        }
+
+        .callout-improvement {
+            background-color: #f0fff4;
+            border-left: 4px solid var(--hosp-accent);
+            color: #134e23;
+        }
+
+        .matrix-table-wrapper {
+            overflow-x: auto;
+            margin-top: 12px;
+        }
+
+        .matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .matrix-table th, .matrix-table td {
+            border: 1px solid #ced4da;
+            padding: 6px 8px;
+            text-align: center;
+        }
+
+        .matrix-table th.col-item, .matrix-table td.col-item {
+            text-align: left;
+            min-width: 200px;
+        }
+
+        .matrix-table tr.cat-header td {
+            background: #e9ecef;
+            font-weight: 700;
+            text-align: left;
+            padding-left: 8px;
+        }
+
+        .sign-area {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            padding-top: 10px;
+        }
+
+        .sign-col {
+            width: 40%;
+            border-top: 1px solid #333;
+            text-align: center;
+            padding-top: 6px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .hospital-footer {
+            padding: 15px 25px;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* ================= MULTI-PAGE PRINT STYLES ================= */
+        @media print {
+            body {
+                background: #ffffff !important;
+                padding: 0;
+                margin: 0;
+                color: #000;
+                font-size: 10pt;
+            }
+
+            .main-wrapper {
+                box-shadow: none;
+                border: none;
+                max-width: 100%;
+            }
+
+            .selection-panel, .action-bar, .hospital-footer, .no-print {
+                display: none !important;
+            }
+
+            .content-body {
+                padding: 10px 20px;
+            }
+
+            /* Prevent elements from breaking awkwardly across pages */
+            .table-custom, .callout-box, .matrix-table-wrapper, .sign-area {
+                page-break-inside: avoid;
+            }
+
+            .page-break {
+                page-break-before: always;
+            }
+
+            .matrix-table th, .matrix-table td {
+                border: 1px solid #000 !important;
+                padding: 4px 6px;
+                font-size: 8.5pt;
+            }
+
+            .matrix-table tr.cat-header td {
+                background-color: #f2f2f2 !important;
+                -webkit-print-color-adjust: exact;
+            }
+
+            .sign-col {
+                border-top: 1px solid #000 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-wrapper">
+    
+    <!-- Standard Hospital Header -->
+    <header class="hospital-header">
+        <div class="header-brand">
+            <img class="header-logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Coat_of_arms_of_Malaysia.svg/300px-Coat_of_arms_of_Malaysia.svg.png" alt="MOH Malaysia">
+            <div class="header-titles">
+                <h1>HOSPITAL UMUM SARAWAK</h1>
+                <h2>DEPARTMENT OF NEPHROLOGY | HAEMODIALYSIS UNIT</h2>
+                <p>Clinical Governance & Quality Improvement Management System</p>
+            </div>
+        </div>
+        <div class="system-badge">
+            Module: Executive Report<br>
+            <span style="font-weight: normal; font-size: 11px;">Accreditation Standard</span>
+        </div>
+    </header>
+
+    <div class="content-body">
+        
+        <!-- Selection Bar -->
+        <div class="selection-panel no-print">
+            <label for="selectAuditSession" style="display: block; font-weight: 700; margin-bottom: 6px; font-size: 13px;">Select Completed Audit Session to View Report:</label>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <select id="selectAuditSession" style="flex: 3; padding: 10px; border-radius: 4px; border: 1px solid var(--border-color); font-size: 14px;">
+                    <option value="">-- Choose Completed Session --</option>
+                </select>
+                <button type="button" class="btn btn-primary" onclick="loadAuditReport()">📊 Generate Report</button>
+                <button type="button" class="btn btn-accent" id="btnPrintReport" style="display: none;" onclick="window.print()">🖨️ Print Full Report (A4)</button>
+            </div>
+        </div>
+
+        <!-- Dynamic Report Container -->
+        <div id="reportDisplayArea">
+            
+            <!-- Report Title & Header -->
+            <div class="report-header-box">
+                <h2 id="repTitle">AUDIT REPORT FOR QUALITY PROJECT</h2>
+                <div style="font-size: 13px; color: var(--hosp-secondary); font-weight: 700; margin-top: 3px;" id="repSubtitle">PREVENTION OF VENOUS NEEDLE DISLODGEMENT IN HAEMODIALYSIS</div>
+                
+                <div class="meta-grid">
+                    <div><strong>Ward / Unit:</strong> <span id="repWard"></span></div>
+                    <div><strong>Date of Audit:</strong> <span id="repDate"></span></div>
+                    <div><strong>Audit Cycle / Period:</strong> <span id="repPeriod"></span></div>
+                    <div><strong>Session Reference:</strong> <span id="repSessionId" style="font-family: monospace;"></span></div>
+                    <div><strong>Target Samples:</strong> <span id="repTarget"></span></div>
+                    <div><strong>Status:</strong> <span id="repStatus" style="font-weight: bold; color: var(--hosp-primary);"></span></div>
+                </div>
+            </div>
+
+            <!-- 1.0 Executive Performance Summary -->
+            <div class="section-heading">1.0 Clinical Performance & Indicator Findings</div>
+            <table class="table-custom">
+                <thead>
+                    <tr>
+                        <th style="width: 50%;">Audit Indicator / Procedure Phase</th>
+                        <th style="width: 15%; text-align: center;">Target</th>
+                        <th style="width: 15%; text-align: center;">Compliance Result</th>
+                        <th style="width: 20%; text-align: center;">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="repIndicatorTbody">
+                    <!-- Populated dynamically -->
+                </tbody>
+                <tfoot>
+                    <tr style="font-weight: bold; background: #fafafa;">
+                        <td>OVERALL COMPLIANCE SCORE</td>
+                        <td style="text-align: center;">90.0%</td>
+                        <td style="text-align: center;" id="repOverallScore">0.0%</td>
+                        <td style="text-align: center;" id="repOverallBadge"></td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <!-- 2.0 Areas of Concern -->
+            <div class="section-heading">2.0 Areas of Concern (Non-Compliances & Clinical Risks)</div>
+            <div class="callout-box callout-concern" id="repConcernText">
+                None documented.
+            </div>
+
+            <!-- 3.0 Areas of Improvement & CAPA -->
+            <div class="section-heading">3.0 Areas of Improvement & Corrective Action Plan (CAPA)</div>
+            <div class="callout-box callout-improvement" id="repImprovementText">
+                None documented.
+            </div>
+
+            <!-- Optional Page Break for Print Formatting -->
+            <div class="page-break"></div>
+
+            <!-- 4.0 Raw Sample Matrix Grid (S1 to S20) -->
+            <div class="section-heading">4.0 Bedside Observation Matrix (Samples S1 to S20)</div>
+            <p style="font-size: 11px; color: var(--text-muted); margin-top: 0;" class="no-print">Individual sample observations recorded by clinical auditors at bedside.</p>
+            
+            <div class="matrix-table-wrapper">
+                <table class="matrix-table" id="repMatrixTable">
+                    <!-- Rendered dynamically -->
+                </table>
+            </div>
+
+            <!-- Official Sign-off Block -->
+            <div class="sign-area">
+                <div class="sign-col">
+                    Auditor Signature & Stamp<br><br><br>
+                    ( ___________________________________ )
+                </div>
+                <div class="sign-col">
+                    Head of Department / Quality Coordinator<br><br><br>
+                    ( ___________________________________ )
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Standard Hospital Footer -->
+    <footer class="hospital-footer no-print">
+        <div>
+            <strong>Haemodialysis Unit</strong> &bull; Sarawak General Hospital, Jalan Hospital, 93586 Kuching, Sarawak
+        </div>
+        <div>
+            Clinical Governance Module &bull; Department Internal Use
+        </div>
+    </footer>
+
+</div>
+
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx_YnzwVZI-7i1uuGw4NlWd_caAECT5qyfvlu8Yh7UhFCqvonaWNdLIkf3wdVV5quJT/exec";
+
+    // Fetch Completed & Active Sessions
+    function fetchAllSessions() {
+        fetch(SCRIPT_URL, {
+            method: 'POST',
+            mode: 'cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'getActiveSessions', payload: {} })
+        })
+        .then(res => res.json())
+        .then(data => {
+            const sel = document.getElementById('selectAuditSession');
+            sel.innerHTML = '<option value="">-- Choose Completed / Active Session --</option>';
+            if (data.success && data.sessions) {
+                data.sessions.forEach(s => {
+                    const opt = document.createElement('option');
+                    opt.value = s.sessionId;
+                    opt.textContent = `[${s.status}] ${s.auditTitle} - ${s.wardUnit} (${s.auditPeriod})`;
+                    sel.appendChild(opt);
+                });
+            }
+        });
+    }
+
+    // Load Complete Audit Report Engine
+    function loadAuditReport() {
+        const sessionId = document.getElementById('selectAuditSession').value;
+        if (!sessionId) {
+            alert("Please select an audit session from the list.");
+            return;
+        }
+
+        fetch(SCRIPT_URL, {
+            method: 'POST',
+            mode: 'cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+                action: 'getAuditReport',
+                payload: { sessionId: sessionId }
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (!data.success) {
+                alert("Failed to load report: " + data.error);
+                return;
+            }
+
+            const meta = data.sessionMeta;
+            const summary = data.summary;
+            const questions = data.questions;
+            const samples = data.samples;
+
+            // Header & Metadata
+            document.getElementById('repTitle').innerText = (meta.auditTitle || "CLINICAL QUALITY AUDIT").toUpperCase();
+            document.getElementById('repSubtitle').innerText = `QUALITY IMPROVEMENT AUDIT & ACCREDITATION REPORT`;
+            document.getElementById('repWard').innerText = meta.wardUnit;
+            document.getElementById('repDate').innerText = meta.createdDate || "2026";
+            document.getElementById('repPeriod').innerText = meta.period;
+            document.getElementById('repSessionId').innerText = meta.sessionId;
+            document.getElementById('repTarget').innerText = `${meta.completedSamples} / ${meta.targetSamples} Samples Recorded`;
+            document.getElementById('repStatus').innerText = meta.status.toUpperCase();
+
+            // Qualitative Synthesis
+            document.getElementById('repConcernText').innerText = meta.areasOfConcern || "No specific areas of concern logged for this session.";
+            document.getElementById('repImprovementText').innerText = meta.areasOfImprovement || "No corrective action plan logged for this session.";
+
+            // Indicator Calculation & Table Breakdown
+            renderIndicatorBreakdown(questions, samples);
+
+            // Overall Summary
+            document.getElementById('repOverallScore').innerText = `${summary.compliancePercentage}%`;
+            const badgeEl = document.getElementById('repOverallBadge');
+            const scoreNum = parseFloat(summary.compliancePercentage);
+
+            if (scoreNum >= 90) {
+                badgeEl.innerHTML = `<span class="status-badge status-compliant">Compliant (Above Target)</span>`;
+            } else if (scoreNum >= 80) {
+                badgeEl.innerHTML = `<span class="status-badge status-improvement">Below Target</span>`;
+            } else {
+                badgeEl.innerHTML = `<span class="status-badge status-danger">Significantly Below Target</span>`;
+            }
+
+            // Render Full Bedside Matrix (S1 to S20)
+            renderMatrixGrid(questions, samples);
+
+            // Show Report
+            document.getElementById('reportDisplayArea').style.display = 'block';
+            document.getElementById('btnPrintReport').style.display = 'inline-flex';
+        })
+        .catch(err => alert("Connection error: " + err));
+    }
+
+    // Indicator Category Roll-up Calculations
+    function renderIndicatorBreakdown(questions, samples) {
+        const catMap = {};
+
+        questions.forEach(q => {
+            const cat = q.category || "General";
+            if (!catMap[cat]) catMap[cat] = { earned: 0, max: 0 };
+        });
+
+        samples.forEach(s => {
+            questions.forEach(q => {
+                const cat = q.category || "General";
+                const qScore = s.scores[q.itemNo];
+                if (qScore !== undefined && qScore !== "N/A") {
+                    catMap[cat].earned += parseFloat(qScore) || 0;
+                    catMap[cat].max += parseFloat(q.maxScore) || 5;
+                }
+            });
+        });
+
+        const tbody = document.getElementById('repIndicatorTbody');
+        tbody.innerHTML = "";
+
+        Object.keys(catMap).forEach(cat => {
+            const item = catMap[cat];
+            const pct = item.max > 0 ? ((item.earned / item.max) * 100).toFixed(1) : "0.0";
+            const num = parseFloat(pct);
+
+            let statusHtml = "";
+            if (num >= 90) {
+                statusHtml = `<span class="status-badge status-compliant">Above Target</span>`;
+            } else if (num >= 80) {
+                statusHtml = `<span class="status-badge status-improvement">Below Target</span>`;
+            } else {
+                statusHtml = `<span class="status-badge status-danger">Significantly Below Target</span>`;
+            }
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${cat}</strong></td>
+                <td style="text-align: center;">90.0%</td>
+                <td style="text-align: center;">${pct}%</td>
+                <td style="text-align: center;">${statusHtml}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // 4.0 Raw Sample Matrix Renderer
+    function renderMatrixGrid(questions, samples) {
+        const table = document.getElementById('repMatrixTable');
+        const sampleCount = samples.length;
+
+        let html = `
+            <thead>
+                <tr>
+                    <th style="width: 30px;">No</th>
+                    <th class="col-item">Indicator / Criteria</th>
+                    <th style="width: 35px;">Max</th>
+                    ${samples.map(s => `<th style="width: 28px;">S${s.sampleNo}</th>`).join('')}
+                    <th style="width: 45px;">%</th>
+                </tr>
+            </thead>
+            <tbody>
+        `;
+
+        let activeCat = "";
+        let itemIndex = 1;
+
+        questions.forEach(q => {
+            if (q.category !== activeCat) {
+                activeCat = q.category;
+                html += `
+                    <tr class="cat-header">
+                        <td colspan="${sampleCount + 4}">${activeCat}</td>
+                    </tr>
+                `;
+            }
+
+            let rowEarned = 0;
+            let rowMax = 0;
+
+            const cells = samples.map(s => {
+                const val = s.scores[q.itemNo];
+                if (val !== undefined && val !== "N/A") {
+                    rowEarned += parseFloat(val) || 0;
+                    rowMax += parseFloat(q.maxScore) || 5;
+                    return `<td>${val}</td>`;
+                }
+                return `<td>-</td>`;
+            }).join('');
+
+            const rowPct = rowMax > 0 ? ((rowEarned / rowMax) * 100).toFixed(0) : "0";
+
+            html += `
+                <tr>
+                    <td>${itemIndex++}</td>
+                    <td class="col-item">${q.questionText}</td>
+                    <td>${q.maxScore}</td>
+                    ${cells}
+                    <td style="font-weight: bold;">${rowPct}%</td>
+                </tr>
+            `;
+        });
+
+        // Total Points Row
+        const totalSamplePoints = samples.map(s => `<td style="font-weight: bold;">${s.earnedPoints}</td>`).join('');
+        html += `
+            <tr style="font-weight: bold; background: #fafafa;">
+                <td colspan="2" style="text-align: right;">TOTAL EARNED POINTS:</td>
+                <td></td>
+                ${totalSamplePoints}
+                <td></td>
+            </tr>
+            </tbody>
+        `;
+
+        table.innerHTML = html;
+    }
+
+    window.onload = function() {
+        fetchAllSessions();
+    };
+</script>
+
+</body>
+</html>
